@@ -1,0 +1,35 @@
+{
+  "name": "global-workforce-orchestrator",
+  "version": "1.0.0",
+  "description": "Hackathon-ready orchestration service that uses Notion as the human workforce command center.",
+  "type": "module",
+  "main": "dist/server/index.js",
+  "scripts": {
+    "dev": "tsx watch server/bootstrap.ts",
+    "dev:insecure": "tsx watch server/bootstrap-insecure.ts",
+    "setup:notion": "tsx scripts/bootstrapNotion.ts",
+    "setup:notion:insecure": "ALLOW_INSECURE_TLS=true NODE_TLS_REJECT_UNAUTHORIZED=0 tsx scripts/bootstrapNotion.ts",
+    "seed:notion": "tsx scripts/seedDemoData.ts",
+    "seed:notion:insecure": "ALLOW_INSECURE_TLS=true NODE_TLS_REJECT_UNAUTHORIZED=0 tsx scripts/seedDemoData.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server/bootstrap.js",
+    "start:insecure": "node dist/server/bootstrap-insecure.js",
+    "check": "tsc --noEmit -p tsconfig.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@notionhq/client": "^5.13.0",
+    "axios": "^1.13.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "langchain": "^1.2.32"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.5.2",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}

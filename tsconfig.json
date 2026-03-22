@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "dist",
+    "rootDir": ".",
+    "strict": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "noEmitOnError": true,
+    "types": ["node"],
+    "lib": ["ES2022", "DOM"]
+  },
+  "include": [
+    "server/**/*.ts",
+    "scripts/**/*.ts",
+    "config/**/*.ts",
+    "notion/**/*.ts",
+    "agents/**/*.ts",
+    "services/**/*.ts",
+    "routes/**/*.ts",
+    "mcp/**/*.ts",
+    "utils/**/*.ts"
+  ]
+}

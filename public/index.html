@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Global Human Workforce Orchestrator</title>
+    <link rel="stylesheet" href="/styles.css?v=11" />
+  </head>
+  <body>
+    <div class="ambient ambient-a"></div>
+    <div class="ambient ambient-b"></div>
+    <div class="ambient ambient-c"></div>
+
+    <main class="shell">
+      <section class="hero glass">
+        <div class="hero-copy">
+          <p class="eyebrow">Notion-Controlled Operations</p>
+          <h1>Global Human Workforce Orchestrator</h1>
+          <p class="lede">
+            A live orchestration cockpit for assigning global human talent with AI, routing low-confidence decisions into approval, and syncing every step back into Notion.
+          </p>
+          <div class="hero-actions">
+            <button id="refresh-button" class="button button-primary" type="button">Refresh Workspace</button>
+            <a class="button button-secondary" href="/api/workspace" target="_blank" rel="noreferrer">Open Raw API</a>
+          </div>
+        </div>
+        <div class="hero-meta">
+          <div class="mini-stat">
+            <span class="mini-label">Status</span>
+            <strong id="connection-status">Connecting...</strong>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-label">Provider</span>
+            <strong id="meta-provider">-</strong>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-label">Model</span>
+            <strong id="meta-model">-</strong>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-label">Approval Threshold</span>
+            <strong id="meta-threshold">-</strong>
+          </div>
+        </div>
+      </section>
+
+      <section id="message-banner" class="message hidden"></section>
+
+      <section class="stats-grid" id="stats-grid">
+        <article class="stat-card glass">
+          <span class="stat-label">Total Tasks</span>
+          <strong class="stat-value" id="stat-total-tasks">-</strong>
+        </article>
+        <article class="stat-card glass">
+          <span class="stat-label">Assigned</span>
+          <strong class="stat-value" id="stat-assigned-tasks">-</strong>
+        </article>
+        <article class="stat-card glass">
+          <span class="stat-label">Pending Approvals</span>
+          <strong class="stat-value" id="stat-pending-approvals">-</strong>
+        </article>
+        <article class="stat-card glass">
+          <span class="stat-label">Avg Confidence</span>
+          <strong class="stat-value" id="stat-average-confidence">-</strong>
+        </article>
+      </section>
+
+      <section class="layout">
+        <div class="column column-wide">
+          <article class="panel glass">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Task Intake</p>
+                <h2>Create a task</h2>
+              </div>
+              <p class="panel-note">This creates a row in the Notion Tasks database.</p>
+            </div>
+
+            <form id="create-task-form" class="form-grid">
+              <label>
+                <span>Title</span>
+                <input name="title" type="text" placeholder="Design landing page" required />
+              </label>
+              <label>
+                <span>Required Skill</span>
+                <input name="requiredSkill" type="text" placeholder="UI Design" required />
+              </label>
+              <label>
+                <span>Priority</span>
+                <select name="priority">
+                  <option value="High">High</option>
+                  <option value="Medium" selected>Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+              </label>
+              <label>
+                <span>Budget</span>
+                <input name="budget" type="number" min="0" step="1" placeholder="500" />
+              </label>
+              <label>
+                <span>Timezone Preference</span>
+                <input name="timezonePreference" type="text" placeholder="UTC+1 or Europe/London" />
+              </label>
+              <label>
+                <span>Requester</span>
+                <input name="createdBy" type="text" placeholder="Name of the requester" />
+              </label>
+              <label class="full-span">
+                <span>Description</span>
+                <textarea name="description" rows="4" placeholder="Create a high-converting landing page for a global payroll startup." required></textarea>
+              </label>
+              <div class="full-span form-actions">
+                <button class="button button-primary" type="submit">Create Task</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="panel glass">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Live Workboard</p>
+                <h2>Tasks</h2>
+              </div>
+              <p class="panel-note">Assign tasks, jump to Notion, and complete work from one place.</p>
+            </div>
+            <div class="task-toolbar">
+              <div class="filter-bar" id="task-filter-bar">
+                <button class="filter-pill is-active" data-filter="all" type="button">All</button>
+                <button class="filter-pill" data-filter="action" type="button">Action Needed</button>
+                <button class="filter-pill" data-filter="assigned" type="button">Assigned</button>
+                <button class="filter-pill" data-filter="completed" type="button">Completed</button>
+              </div>
+              <span class="task-toolbar-note" id="task-filter-note">Showing all tasks</span>
+            </div>
+            <div id="tasks-empty" class="empty-state hidden">No tasks yet. Create one to start the demo.</div>
+            <div id="task-list" class="card-list"></div>
+          </article>
+        </div>
+
+        <div class="column">
+          <article class="panel glass">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Human In The Loop</p>
+                <h2>Approvals</h2>
+              </div>
+              <p class="panel-note">Low-confidence assignments appear here and in Notion.</p>
+            </div>
+            <div id="approvals-empty" class="empty-state hidden">No approvals are pending right now.</div>
+            <div id="approval-list" class="stack-list"></div>
+          </article>
+
+          <article class="panel glass">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Global Talent Pool</p>
+                <h2>Workers</h2>
+              </div>
+              <p class="panel-note">Availability, timezone, and rates come directly from Notion.</p>
+            </div>
+            <div id="worker-list" class="stack-list compact"></div>
+          </article>
+
+          <article id="audit-panel" class="panel glass panel-collapsible">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Audit Trail</p>
+                <h2>Recent Logs</h2>
+              </div>
+              <div class="panel-head-actions">
+                <p class="panel-note">Every action is persisted back to Notion Logs.</p>
+                <button
+                  id="audit-toggle"
+                  class="panel-toggle"
+                  type="button"
+                  aria-expanded="true"
+                  aria-controls="audit-log-region"
+                >
+                  Hide Logs
+                </button>
+              </div>
+            </div>
+            <div id="audit-log-region" class="collapsible-region">
+              <div id="log-list" class="timeline"></div>
+            </div>
+          </article>
+
+          <article class="panel glass">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Audit Assistant</p>
+                <h2>Ask The Logs</h2>
+              </div>
+              <p class="panel-note">Chat with the audit trail to explain manual Notion edits, approvals, and recent incidents.</p>
+            </div>
+            <div class="audit-chat">
+              <div class="audit-suggestions" id="audit-suggestions">
+                <button class="audit-suggestion" data-prompt="What changed in Notion today?" type="button">What changed today?</button>
+                <button class="audit-suggestion" data-prompt="Which tasks needed approval recently?" type="button">Which tasks needed approval?</button>
+                <button class="audit-suggestion" data-prompt="Summarize the latest manual edits from Notion." type="button">Summarize manual edits</button>
+              </div>
+              <div id="audit-chat-thread" class="chat-thread"></div>
+              <form id="audit-chat-form" class="audit-chat-form">
+                <label>
+                  <span>Ask the audit assistant</span>
+                  <textarea id="audit-chat-input" name="message" rows="3" placeholder="Why was Akss AI marked completed, and what changed in Notion?"></textarea>
+                </label>
+                <div class="card-actions">
+                  <button class="button button-primary" type="submit">Ask Audit Chat</button>
+                </div>
+              </form>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <template id="task-card-template">
+      <article class="task-card card glass">
+        <div class="task-signal-row">
+          <span class="badge task-status"></span>
+          <span class="task-priority-pill"></span>
+          <span class="confidence-chip"></span>
+        </div>
+        <h3 class="task-title"></h3>
+        <p class="task-description"></p>
+        <div class="task-meta-grid">
+          <div class="task-meta-item">
+            <span class="task-meta-label">Skill</span>
+            <strong class="detail-skill"></strong>
+          </div>
+          <div class="task-meta-item">
+            <span class="task-meta-label">Worker</span>
+            <strong class="detail-worker"></strong>
+          </div>
+          <div class="task-meta-item">
+            <span class="task-meta-label">Approval</span>
+            <strong class="detail-approval"></strong>
+          </div>
+          <div class="task-meta-item">
+            <span class="task-meta-label">Updated</span>
+            <strong class="detail-updated"></strong>
+          </div>
+        </div>
+        <div class="card-actions">
+          <button class="button button-primary action-assign" type="button">Run Assignment</button>
+          <button class="button button-secondary action-complete-toggle hidden" type="button">Complete Task</button>
+          <button class="button button-ghost action-details-toggle" type="button">Details</button>
+          <a class="button button-secondary action-notion" target="_blank" rel="noreferrer">Open in Notion</a>
+        </div>
+        <section class="task-details hidden">
+          <div class="task-detail-block">
+            <span class="task-meta-label detail-story-label">Workflow Story</span>
+            <p class="reasoning hidden"></p>
+          </div>
+          <div class="task-detail-block detail-grid task-secondary-grid">
+            <span class="detail-item detail-priority"></span>
+            <span class="detail-item detail-confidence"></span>
+            <span class="detail-item detail-completed-at hidden"></span>
+            <span class="detail-item detail-quality hidden"></span>
+          </div>
+          <form class="complete-form hidden">
+            <label>
+              <span>Completion Notes</span>
+              <textarea name="completionNotes" rows="3" placeholder="Shared the final file, developer handoff, and QA notes."></textarea>
+            </label>
+            <button class="button button-secondary" type="submit">Mark Completed</button>
+          </form>
+        </section>
+      </article>
+    </template>
+
+    <template id="approval-card-template">
+      <article class="approval-card card glass">
+        <div class="card-topline">
+          <span class="badge approval-status"></span>
+          <a class="inline-link approval-link" target="_blank" rel="noreferrer">Open in Notion</a>
+        </div>
+        <h3 class="approval-title"></h3>
+        <p class="approval-reason"></p>
+        <div class="detail-grid">
+          <span class="detail-item approval-worker"></span>
+          <span class="detail-item approval-confidence"></span>
+        </div>
+        <form class="approval-form">
+          <label>
+            <span>Reviewer</span>
+            <input name="reviewer" type="text" placeholder="Operations Lead" required />
+          </label>
+          <label>
+            <span>Notes</span>
+            <textarea name="notes" rows="2" placeholder="Add the human decision note."></textarea>
+          </label>
+          <div class="card-actions">
+            <button class="button button-primary action-approve" type="submit">Approve</button>
+            <button class="button button-secondary action-reject" type="button">Reject</button>
+          </div>
+        </form>
+      </article>
+    </template>
+
+    <script src="/app.js?v=14" type="module"></script>
+  </body>
+</html>
