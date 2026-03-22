@@ -395,8 +395,41 @@ const showMessage = (text, type = "success") => {
   }, 4200);
 };
 
+const summarizeNonJsonResponse = (text) => {
+  const compactText = (text || "").replace(/\s+/g, " ").trim();
+  const titleMatch = compactText.match(/<title>([^<]+)<\/title>/i);
+
+  if (titleMatch?.[1]) {
+    return titleMatch[1];
+  }
+
+  if (compactText.startsWith("<!DOCTYPE") || compactText.startsWith("<html")) {
+    return "The server returned HTML instead of JSON.";
+  }
+
+  return compactText.slice(0, 180);
+};
+
+const readJsonResponse = async (response) => {
+  const contentType = response.headers.get("content-type") || "";
+
+  if (!contentType.toLowerCase().includes("application/json")) {
+    const text = await response.text();
+    throw new Error(summarizeNonJsonResponse(text) || "The server did not return JSON.");
+  }
+
+  return response.json();
+};
+
 const handleApiError = async (response) => {
-  const payload = await response.json().catch(() => ({}));
+  let payload = {};
+
+  try {
+    payload = await readJsonResponse(response);
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : `Request failed with status ${response.status}.`);
+  }
+
   const message = payload.error || `Request failed with status ${response.status}.`;
   throw new Error(message);
 };
@@ -414,7 +447,7 @@ const request = async (path, options = {}) => {
     await handleApiError(response);
   }
 
-  return response.json();
+  return readJsonResponse(response);
 };
 
 const setLoadingState = (button, isLoading, label) => {
