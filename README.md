@@ -4,6 +4,12 @@ Global Human Workforce Orchestrator is a Notion hackathon project that uses AI a
 
 It helps teams create tasks, match them with the right worker, send low-confidence decisions for human approval, and keep the full workflow visible in one dashboard.
 
+## Demo Video
+
+[![Watch the video demo](https://cdn.loom.com/sessions/thumbnails/767481801c9d40109a32659060d4d41b-with-play.gif)](https://www.loom.com/share/767481801c9d40109a32659060d4d41b)
+
+[Watch the Loom demo](https://www.loom.com/share/767481801c9d40109a32659060d4d41b)
+
 ## Problem
 
 Managing tasks across a global team is slow when assignment, approvals, and tracking happen in different places.
