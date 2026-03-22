@@ -16,6 +16,7 @@
     "lib": ["ES2022", "DOM"]
   },
   "include": [
+    "app.ts",
     "server/**/*.ts",
     "scripts/**/*.ts",
     "config/**/*.ts",

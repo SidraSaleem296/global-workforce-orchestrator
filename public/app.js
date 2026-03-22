@@ -913,7 +913,7 @@ const refreshWorkspace = async (showRefreshToast = false) => {
     selectors.connectionStatus.textContent = "Syncing...";
 
     const [meta, workspace] = await Promise.all([
-      request("/api"),
+      request("/api/meta"),
       request("/api/workspace"),
     ]);
 
